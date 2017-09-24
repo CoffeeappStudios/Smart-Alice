@@ -1,0 +1,4 @@
+sceneSetups:
+- path: Assets/Matematik/Balon/Matematik(Balon).unity
+  isLoaded: 1
+  isActive: 1
