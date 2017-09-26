@@ -1,4 +1,4 @@
 sceneSetups:
-- path: Assets/Matematik/Balon(Sayma)/Matematik(Balon).unity
+- path: Assets/Matematik/Sepet(ToplamaCikarma)/ToplamaCikarma.unity
   isLoaded: 1
   isActive: 1
