@@ -1,19 +1,26 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
 using System.Collections;
+using UnityEngine.SceneManagement;
 
 public class Detect : MonoBehaviour
 {
 
-    public enum Tur {BalonPatlatma};
+    public enum Tur {BalonPatlatma, ElmaIslemleri};
 
     public Tur oyunTuru;
-    [HideInInspector]
-    public GameObject patlamaParticle, balonPrefab;
-    [HideInInspector]
-    public int baslangicSayisi, balonSayisi;
-    [HideInInspector]
+    [HideInInspector]//Inspectorda gözükenler
+    public GameObject patlamaParticle, balonPrefab,elmaPrefab, islemObjesi,sepetObjesi;
+    //Sadece kodda kullanılanlar
+    private GameObject elmaKlon;
+    [HideInInspector]//Inspectorda gözükenler
+    public int baslangicSayisi, balonSayisi,maxElmaSayisi;
+    //Sadece kodda kullanılanlar
+    private int elmaSayisi, sepettekiElmalar;
+    [HideInInspector]//Inspectorda gözükenler
     public Vector3 spawnMin, spawnMax;
+    [HideInInspector]//Inspectorda gözükenler
+    public float elmalarArasi;
 
     private void Start()
     {
@@ -22,6 +29,108 @@ public class Detect : MonoBehaviour
             for (int i = baslangicSayisi; i <= balonSayisi; i++)
             {
                 BalonSpawnla(i);
+            }
+        }
+        else if(oyunTuru == Tur.ElmaIslemleri)
+        {
+            ElmaSpawnla();
+            sepettekiElmalar = 0;
+            sepetObjesi.GetComponentInChildren<Text>().text = sepettekiElmalar.ToString();
+        }
+    }
+
+    void ElmaSpawnla()
+    {
+        int islem = Random.Range(1, 11); //1-5 toplama, 6-10 çıkarma
+        int spL = Random.Range(1, maxElmaSayisi + 1);
+        int spR = Random.Range(1, maxElmaSayisi + 1);
+        if (islem < 5)
+        {
+            islemObjesi.SetActive(true);
+            elmaSayisi = spR + spL;
+            //Soldaki elmaların klonlanması
+            for (int i = 0; i < spL; i++)
+            {
+                if (i < 5)
+                {
+                    Instantiate(elmaPrefab, new Vector3(spawnMin.x + (i * elmalarArasi), spawnMin.y, spawnMin.z), Quaternion.identity);
+                }
+                else
+                {
+                    Instantiate(elmaPrefab, new Vector3(spawnMin.x + ((i - 5) * elmalarArasi), spawnMin.y, spawnMin.z - elmalarArasi), Quaternion.identity);
+                }
+            }
+            //Sağdaki elmaların klonlanması
+            for (int i = 0; i < spR; i++)
+            {
+                if (i < 5)
+                {
+                    Instantiate(elmaPrefab, new Vector3(spawnMax.x + (i * elmalarArasi), spawnMax.y, spawnMax.z), Quaternion.identity);
+                }
+                else
+                {
+                    Instantiate(elmaPrefab, new Vector3(spawnMax.x + ((i - 5) * elmalarArasi), spawnMax.y, spawnMax.z - elmalarArasi), Quaternion.identity);
+                }
+            }
+        }
+        else
+        {
+            islemObjesi.SetActive(false);
+            elmaSayisi = Mathf.Abs(spR - spL);
+            //Çocuğun karşısına eksi değer çıkmaması için
+            if (spR > spL)
+            {
+                //Soldaki elmaların klonlanması
+                for (int i = 0; i < spR; i++)
+                {
+                    if (i < 5)
+                    {
+                        Instantiate(elmaPrefab, new Vector3(spawnMin.x + (i * elmalarArasi), spawnMin.y, spawnMin.z), Quaternion.identity);
+                    }
+                    else
+                    {
+                        Instantiate(elmaPrefab, new Vector3(spawnMin.x + ((i - 5) * elmalarArasi), spawnMin.y, spawnMin.z - elmalarArasi), Quaternion.identity);
+                    }
+                }
+                //Sağdaki elmaların klonlanması
+                for (int i = 0; i < spL; i++)
+                {
+                    if (i < 5)
+                    {
+                        Instantiate(elmaPrefab, new Vector3(spawnMax.x + (i * elmalarArasi), spawnMax.y, spawnMax.z), Quaternion.identity);
+                    }
+                    else
+                    {
+                        Instantiate(elmaPrefab, new Vector3(spawnMax.x + ((i - 5) * elmalarArasi), spawnMax.y, spawnMax.z - elmalarArasi), Quaternion.identity);
+                    }
+                }
+            }
+            else
+            {
+                //Soldaki elmaların klonlanması
+                for (int i = 0; i < spL; i++)
+                {
+                    if (i < 5)
+                    {
+                        Instantiate(elmaPrefab, new Vector3(spawnMin.x + (i * elmalarArasi), spawnMin.y, spawnMin.z), Quaternion.identity);
+                    }
+                    else
+                    {
+                        Instantiate(elmaPrefab, new Vector3(spawnMin.x + ((i - 5) * elmalarArasi), spawnMin.y, spawnMin.z - elmalarArasi), Quaternion.identity);
+                    }
+                }
+                //Sağdaki elmaların klonlanması
+                for (int i = 0; i < spR; i++)
+                {
+                    if (i < 5)
+                    {
+                        Instantiate(elmaPrefab, new Vector3(spawnMax.x + (i * elmalarArasi), spawnMax.y, spawnMax.z), Quaternion.identity);
+                    }
+                    else
+                    {
+                        Instantiate(elmaPrefab, new Vector3(spawnMax.x + ((i - 5) * elmalarArasi), spawnMax.y, spawnMax.z - elmalarArasi), Quaternion.identity);
+                    }
+                }
             }
         }
     }
@@ -82,7 +191,7 @@ public class Detect : MonoBehaviour
         {
             if (Physics.Raycast(camera.ScreenPointToRay(Input.mousePosition), out hit,150))
             {
-                if (oyunTuru == Tur.BalonPatlatma)
+                if(oyunTuru == Tur.BalonPatlatma)
                 {
                     string[] sayiAl = hit.transform.name.Split("-"[0]);
                     if (hit.transform.gameObject.tag == "Interactable" && int.Parse(sayiAl[1]) == baslangicSayisi)
@@ -103,6 +212,71 @@ public class Detect : MonoBehaviour
                         StartCoroutine(RengiEskiyeDondurme(hit.transform.gameObject, hit.transform.GetComponent<MeshRenderer>().materials[0].color, 0.5f));
                         hit.transform.GetComponent<MeshRenderer>().materials[0].color = Color.red;
                     }
+                }
+                if(oyunTuru == Tur.ElmaIslemleri)
+                {
+                    if(hit.transform.gameObject.tag == "Respawn")
+                    {
+                        elmaKlon = Instantiate(elmaPrefab, hit.point, Quaternion.identity);
+                    }
+                    if(hit.transform.gameObject.tag == "Interactable" && sepettekiElmalar > 0)
+                    {
+                        sepettekiElmalar--;
+                        sepetObjesi.GetComponentInChildren<Text>().text = sepettekiElmalar.ToString();
+                        elmaKlon = Instantiate(elmaPrefab, hit.point, Quaternion.identity);
+                    }
+                    if(hit.transform.tag == "Finish")
+                    {
+                        if(sepettekiElmalar == elmaSayisi)
+                        {
+                            Debug.Log("Dogru bildin");
+                            SceneManager.LoadScene("ToplamaCikarma");
+                        }
+                        else
+                        {
+                            Debug.Log("Yanlış!");
+                            sepettekiElmalar = 0;
+                            sepetObjesi.GetComponentInChildren<Text>().text = sepettekiElmalar.ToString();
+                        }
+                    }
+                }
+            }
+        }
+        if (Input.GetMouseButton(0))
+        {
+            Physics.Raycast(camera.ScreenPointToRay(Input.mousePosition), out hit, 150);
+            if (oyunTuru == Tur.ElmaIslemleri)
+            {
+                if(elmaKlon != null)
+                {
+                    elmaKlon.transform.position = hit.point;
+                }
+            }
+        }
+        if (Input.GetMouseButtonUp(0))
+        {
+            Physics.Raycast(camera.ScreenPointToRay(Input.mousePosition), out hit, 150);
+            if(oyunTuru == Tur.ElmaIslemleri)
+            {
+                if(hit.transform != null)
+                {
+                    if (elmaKlon != null && hit.transform.tag == "Interactable")
+                    {
+                        sepettekiElmalar++;
+                        sepetObjesi.GetComponentInChildren<Text>().text = sepettekiElmalar.ToString();
+                        Destroy(elmaKlon);
+                        elmaKlon = null;
+                    }
+                    else if (elmaKlon != null)
+                    {
+                        Destroy(elmaKlon);
+                        elmaKlon = null;
+                    }
+                }
+                else
+                {
+                    Destroy(elmaKlon);
+                    elmaKlon = null;
                 }
             }
         }
