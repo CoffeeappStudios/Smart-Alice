@@ -1,4 +1,4 @@
 sceneSetups:
-- path: Assets/Matematik/Sepet(ToplamaCikarma)/ToplamaCikarma.unity
+- path: Assets/Fizik/SanalOyuncaklar(Kuvvet)/SanalKup(KuvvetiTanima).unity
   isLoaded: 1
   isActive: 1

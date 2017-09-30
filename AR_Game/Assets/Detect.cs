@@ -1,18 +1,20 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine.SceneManagement;
 
 public class Detect : MonoBehaviour
 {
 
-    public enum Tur {BalonPatlatma, ElmaIslemleri};
+    public enum Tur {BalonPatlatma, ElmaIslemleri, KupItme};
 
     public Tur oyunTuru;
     [HideInInspector]//Inspectorda gözükenler
-    public GameObject patlamaParticle, balonPrefab,elmaPrefab, islemObjesi,sepetObjesi;
+    public GameObject patlamaParticle, balonPrefab,elmaPrefab, islemObjesi,sepetObjesi, kuvvetSprite, kuvvetSlider;
     //Sadece kodda kullanılanlar
-    private GameObject elmaKlon;
+    private GameObject elmaKlon, kuvvetKlon, sanalKup;
+    private List<GameObject> klonlananlar = new List<GameObject>();
     [HideInInspector]//Inspectorda gözükenler
     public int baslangicSayisi, balonSayisi,maxElmaSayisi;
     //Sadece kodda kullanılanlar
@@ -20,7 +22,7 @@ public class Detect : MonoBehaviour
     [HideInInspector]//Inspectorda gözükenler
     public Vector3 spawnMin, spawnMax;
     [HideInInspector]//Inspectorda gözükenler
-    public float elmalarArasi;
+    public float elmalarArasi, kuvvetCarpani;
 
     private void Start()
     {
@@ -213,7 +215,7 @@ public class Detect : MonoBehaviour
                         hit.transform.GetComponent<MeshRenderer>().materials[0].color = Color.red;
                     }
                 }
-                if(oyunTuru == Tur.ElmaIslemleri)
+                else if(oyunTuru == Tur.ElmaIslemleri)
                 {
                     if(hit.transform.gameObject.tag == "Respawn")
                     {
@@ -225,19 +227,28 @@ public class Detect : MonoBehaviour
                         sepetObjesi.GetComponentInChildren<Text>().text = sepettekiElmalar.ToString();
                         elmaKlon = Instantiate(elmaPrefab, hit.point, Quaternion.identity);
                     }
-                    if(hit.transform.tag == "Finish")
+                    //if(hit.transform.tag == "Finish")
+                    //{
+                    //    if(sepettekiElmalar == elmaSayisi)
+                    //    {
+                    //        Debug.Log("Dogru bildin");
+                    //        SceneManager.LoadScene("ToplamaCikarma");
+                    //    }
+                    //    else
+                    //    {
+                    //        Debug.Log("Yanlış!");
+                    //        sepettekiElmalar = 0;
+                    //        sepetObjesi.GetComponentInChildren<Text>().text = sepettekiElmalar.ToString();
+                    //    }
+                    //}
+                }
+                else if(oyunTuru == Tur.KupItme)
+                {
+                    if(hit.transform.tag == "Interactable")
                     {
-                        if(sepettekiElmalar == elmaSayisi)
-                        {
-                            Debug.Log("Dogru bildin");
-                            SceneManager.LoadScene("ToplamaCikarma");
-                        }
-                        else
-                        {
-                            Debug.Log("Yanlış!");
-                            sepettekiElmalar = 0;
-                            sepetObjesi.GetComponentInChildren<Text>().text = sepettekiElmalar.ToString();
-                        }
+                        Destroy(kuvvetKlon);
+                        kuvvetKlon = Instantiate(kuvvetSprite, hit.point, Quaternion.FromToRotation(Vector3.back, hit.normal),hit.transform);
+                        sanalKup = hit.transform.gameObject;
                     }
                 }
             }
@@ -324,6 +335,47 @@ public class Detect : MonoBehaviour
     {
         yield return new WaitForSeconds(sure);
         obje.GetComponent<MeshRenderer>().materials[0].color = matColor;
+    }
+
+    public void ElmalariSay()
+    {
+        if (sepettekiElmalar == elmaSayisi)
+        {
+            Debug.Log("Dogru bildin");
+            SceneManager.LoadScene("ToplamaCikarma");
+        }
+        else
+        {
+            Debug.Log("Yanlış!");
+            sepettekiElmalar = 0;
+            sepetObjesi.GetComponentInChildren<Text>().text = sepettekiElmalar.ToString();
+        }
+    }
+
+    public void KuvvetUygula()
+    {
+        if(sanalKup != null)
+        {
+            sanalKup.GetComponent<Rigidbody>().AddForceAtPosition(kuvvetSlider.GetComponentInChildren<D3Slider>().value * kuvvetCarpani * kuvvetKlon.transform.forward, kuvvetKlon.transform.position);
+        }
+    }
+
+    public void OyuncakKlonla(GameObject oyuncak)
+    {
+        GameObject Oynck = Instantiate(oyuncak, new Vector3(0, 1.2f, 0), Random.rotation);
+        Oynck.GetComponent<Rigidbody>().useGravity = true;
+        Oynck.tag = "Interactable";
+        Destroy(Oynck.GetComponent<D3Button>());
+        klonlananlar.Add(Oynck);
+    }
+
+    public void OyuncaklariTemizle()
+    {
+        for(int i = 0; i < klonlananlar.Count; i++)
+        {
+            Destroy(klonlananlar[i].gameObject);
+        }
+        klonlananlar.Clear();
     }
 
 }

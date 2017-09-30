@@ -30,6 +30,12 @@ public class Detect_Editor : Editor {
             dt.elmalarArasi = EditorGUILayout.FloatField("Elmalar arası mesafe: ", dt.elmalarArasi);
             dt.maxElmaSayisi = EditorGUILayout.IntField("Max elma sayısı: ", dt.maxElmaSayisi);
         }
+        else if (dt.oyunTuru == Detect.Tur.KupItme)
+        {
+            dt.kuvvetSprite = (GameObject)EditorGUILayout.ObjectField("Kuvvet(Sprite) prefab'ı: ", dt.kuvvetSprite, typeof(GameObject), true);
+            dt.kuvvetSlider = (GameObject)EditorGUILayout.ObjectField("Kuvvet Slider'ı: ", dt.kuvvetSlider, typeof(GameObject), true);
+            dt.kuvvetCarpani = EditorGUILayout.FloatField("Kuvvet çarpanı: ", dt.kuvvetCarpani);
+        }
     }
 
 }
